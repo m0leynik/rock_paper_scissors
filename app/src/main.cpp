@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include "random_input_provider.h"
+#include "console_input_provider.h"
+
 namespace {
 void printHelp(std::ostream &out) {
     out << "Hello from the Papaer-Rock-Scissors game!\n"

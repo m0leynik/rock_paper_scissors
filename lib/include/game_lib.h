@@ -5,7 +5,7 @@
 #include <optional>
 #include <string>
 
-#include <input_provider.h>
+#include <input_provider_iface.h>
 
 struct Scores{
     uint32_t user;
