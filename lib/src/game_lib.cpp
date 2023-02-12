@@ -1,4 +1,4 @@
-#include "prs_lib.h"
+#include "game_lib.h"
 
 #include <iostream>
 #include <limits>

@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "prs_lib.h"
+#include "game_lib.h"
 #include "input_provider_mock.h"
 
 namespace {
