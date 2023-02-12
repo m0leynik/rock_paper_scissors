@@ -21,8 +21,13 @@ private:
 };
 
 uint32_t GetUserInputFromConsole() {
-    uint32_t result = 0;
-    std::cin >> result;
+    std::string input{};
+    std::cin >> input;
+
+    const auto result = std::stol(input, nullptr);
+    if (result < 0 ) {
+        throw std::invalid_argument("unsigned integer expected");
+    }
     return result;
 }
 

@@ -12,7 +12,7 @@ struct Scores{
     uint32_t oponent;
 };
 
-Scores PlayGame(uint32_t numRounds, IInputProvider &userInputProvider, IInputProvider &oponentInputProvider, std::ostream &outputStream);
+Scores PlayGame(uint32_t numRounds, IInputProvider &userInputProvider, IInputProvider &oponentInputProvider, std::ostream &out);
 uint32_t GetNumberOfRounds(int argc, char *argv[]);
 
 #endif // ___PRS_LIB_H___

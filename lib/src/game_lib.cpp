@@ -12,20 +12,25 @@ uint32_t getUintFromArgument(int pos, int argc, char *argv[]) {
     } else {
         const auto result = std::stol(argv[pos], nullptr);
         if (result <= 0 ) {
-            throw std::invalid_argument("unsigned integer expected");
+            throw std::invalid_argument("positive integer expected");
         }
         return result;
     }
 }
 
-void showTheRules(std::ostream &outputStream) {
-    outputStream << "New round!\n Please, enter your sign:\n" <<
-        std::to_string(uint32_t(Shape::Paper)) << " - Paper\n" <<
-        std::to_string(uint32_t(Shape::Rock)) << " - Rock\n" <<
-        std::to_string(uint32_t(Shape::Scissors)) << " - Scissors";
-}
+std::array<std::string, size_t(Shape::ShapesCount)> ShapeToString = {
+    "Paper", "Rock", "Scissors"
+};
 
-enum class RoundResult : uint32_t { Won, Draw, Lost };
+void showTheRules(std::ostream &out) {
+    static const std::string Rules = std::string("New round!\n") +
+        "Please, enter your sign:\n" +
+        std::to_string(uint32_t(Shape::Paper)) + " - " + ShapeToString[size_t(Shape::Paper)] + "\n" +
+        std::to_string(uint32_t(Shape::Rock)) + " - " + ShapeToString[size_t(Shape::Rock)] + "\n" +
+        std::to_string(uint32_t(Shape::Scissors)) + " - " + ShapeToString[size_t(Shape::Scissors)] + "\n";
+    
+    out << Rules;
+}
 
 Shape uintToShape(uint32_t input) {
 
@@ -35,6 +40,8 @@ Shape uintToShape(uint32_t input) {
 
     return Shape(input);
 }
+
+enum class RoundResult : uint32_t { Won, Draw, Lost };
 
 RoundResult calculateUserResult(Shape userShape, Shape oponentShape) {
     static RoundResult GameRules [uint32_t(Shape::ShapesCount)][uint32_t(Shape::ShapesCount)] = {
@@ -65,30 +72,56 @@ void updateScores(RoundResult roundResult, Scores &scores) {
         throw std::invalid_argument("invalid round result specified");
     }
 }
-} // namespace
 
-RoundResult PlayRound(IInputProvider &userInputProvider, IInputProvider &oponentInputProvider, std::ostream &outputStream) {
-    try
-    {
-        const auto oponentShape = uintToShape(oponentInputProvider.GetInput());
-        const auto userShape = uintToShape(userInputProvider.GetInput());
-        return calculateUserResult(userShape, oponentShape);
-    }
-    catch(const std::exception& e)
-    {
-        outputStream << e.what() << std::endl;
-        // assume round completed in case of exception
-        return RoundResult::Draw;
+std::string_view RoundResultToString(RoundResult roundResult) {
+    
+    if (roundResult == RoundResult::Won) { 
+        return "Won :)";
+    } else if (roundResult == RoundResult::Draw) {
+        return "Draw :|";
+    } else if (roundResult == RoundResult::Lost) {
+        return "Lost :(";
+    } else {
+        throw std::invalid_argument("invalid round result specified");
     }
 }
 
-Scores PlayGame(uint32_t numRounds, IInputProvider &userInputProvider, IInputProvider &oponentInputProvider, std::ostream &outputStream) {
+void showRoundResults(RoundResult roundResult, Shape userShape, Shape oponentShape, const Scores &scores, std::ostream &out) {
+
+    out << "Your shape is " << ShapeToString[uint32_t(userShape)] << std::endl
+        << "Oponent's shape is " << ShapeToString[uint32_t(oponentShape)] << std::endl
+        << std::endl
+        << RoundResultToString(roundResult) << std::endl
+        << std::endl
+        << "Scores" << std::endl
+        << "Yours: " << scores.user << std::endl
+        << "Oponent's: " << scores.oponent << std::endl;
+}
+
+void playRound(IInputProvider &userInputProvider, IInputProvider &oponentInputProvider, Scores &scores, std::ostream &out) {
+    try
+    {
+        const auto userShape = uintToShape(userInputProvider.GetInput());
+        const auto oponentShape = uintToShape(oponentInputProvider.GetInput());
+        
+        const auto roundResult = calculateUserResult(userShape, oponentShape);
+        updateScores(roundResult, scores);
+        showRoundResults(roundResult, userShape, oponentShape, scores, out);
+    }
+    catch(const std::exception& e)
+    {
+        // assume round completed in case of exception
+        out << e.what() << std::endl;
+    }
+}
+} // namespace
+
+Scores PlayGame(uint32_t numRounds, IInputProvider &userInputProvider, IInputProvider &oponentInputProvider, std::ostream &out) {
 
     Scores scores{};
     for (uint32_t round = 0; round < numRounds; ++round) {
-        showTheRules(outputStream);
-        const auto roundResults = PlayRound(userInputProvider, oponentInputProvider, outputStream);
-        updateScores(roundResults, scores);
+        showTheRules(out);
+        playRound(userInputProvider, oponentInputProvider, scores, out);
     }
 
     return scores;
